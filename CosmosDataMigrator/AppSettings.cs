@@ -14,7 +14,7 @@
 
         public int MaxRetryAttemptsOnRateLimitedRequests { get; set; }
 
-        public int MaxRetryWaitTimeOnRateLimitedRequests { get; set; }
+        public int MaxRetryWaitTimeOnRateLimitedRequestsInSeconds { get; set; }
 
         public override string ToString()
         {
@@ -26,7 +26,7 @@
                 "Max Retry Wait Time:\t\t {6}(s)\n\n" +
                 "Source Connection String:\n\n {2}\n\n" +
                 "Destination Connection String:\n\n {3}\n",                
-                DatabaseName, ContainerName, SourceConnectionString, DestinationConnectionString, MaxItemCount, MaxRetryAttemptsOnRateLimitedRequests, MaxRetryWaitTimeOnRateLimitedRequests);
+                DatabaseName, ContainerName, SourceConnectionString, DestinationConnectionString, MaxItemCount, MaxRetryAttemptsOnRateLimitedRequests, MaxRetryWaitTimeOnRateLimitedRequestsInSeconds);
         }
     }
 }

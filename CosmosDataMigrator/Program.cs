@@ -31,7 +31,7 @@ namespace CosmosDataMigrator
             var cosmosClientOptions = new CosmosClientOptions
             {
                 MaxRetryAttemptsOnRateLimitedRequests = appSettings.MaxRetryAttemptsOnRateLimitedRequests,
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(appSettings.MaxRetryWaitTimeOnRateLimitedRequests)
+                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(appSettings.MaxRetryWaitTimeOnRateLimitedRequestsInSeconds)
             };
 
             using var sourceClient = new CosmosClient(appSettings.SourceConnectionString, cosmosClientOptions);
