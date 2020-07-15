@@ -4,7 +4,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace CosmosDataMigrator
@@ -40,18 +39,18 @@ namespace CosmosDataMigrator
                     queryDefinition: null,
                     requestOptions: new QueryRequestOptions
                     {
-                        MaxItemCount = 1
-                    });                
+                        MaxItemCount = appSettings.MaxItemCount
+                    });
 
                 while (resultSet.HasMoreResults)
                 {
                     FeedResponse<dynamic> response = await resultSet.ReadNextAsync();
 
-                    var resource = response.Resource.Single();
+                    var itemList = response.Resource.ToList();
 
-                    Log.Information($"Retrieved document with id: {resource.id}");
+                    itemList.ForEach(item => Log.Information($"Retrieved document with id: {item.id}"));
 
-                    documentsToMigrate.Add(resource);
+                    documentsToMigrate.AddRange(itemList);
                 }
             } 
             catch (Exception ex)
@@ -63,30 +62,18 @@ namespace CosmosDataMigrator
             Log.Information($"{documentsToMigrate.Count} retrieved from source, press any key to proceed with write operation...");
             Console.ReadLine();
 
-            int writeCount = 0;
             List<Task> concurrentTasks = new List<Task>();
             
             using var destinationClient = new CosmosClient(appSettings.DestinationConnectionString);
             var destinationContainer = destinationClient.GetContainer(appSettings.DatabaseName, appSettings.ContainerName);
 
             foreach (var itemToInsert in documentsToMigrate)
-            {
-                concurrentTasks.Add(Task.Run(() =>
-                {
-                    Log.Information($"Writing document with ID: {itemToInsert.id}");
-                    Interlocked.Increment(ref writeCount);
-                })
-                    .ContinueWith(a => destinationContainer.CreateItemAsync(itemToInsert)));
-            }
+                concurrentTasks.Add(destinationContainer.CreateItemAsync(itemToInsert));
 
             try
             {
                 await Task.WhenAll(concurrentTasks);
-
-                if (writeCount != documentsToMigrate.Count)
-                    Log.Warning($"{writeCount} documents were successfully written to the destination database, the expected number however was of {documentsToMigrate.Count}. This needs to be investigated.");
-                else
-                    Log.Information($"{writeCount} documents were successfully written to the destination database.");
+                Log.Information($"{documentsToMigrate.Count} documents were successfully written to the destination database.");
             }
             catch (Exception ex)
             {
