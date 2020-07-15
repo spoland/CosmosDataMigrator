@@ -74,7 +74,7 @@ namespace CosmosDataMigrator
             var destinationContainer = destinationClient.GetContainer(appSettings.DatabaseName, appSettings.ContainerName);
 
             foreach (var itemToInsert in documentsToMigrate)
-                concurrentTasks.Add(destinationContainer.CreateItemAsync(itemToInsert));
+                concurrentTasks.Add(destinationContainer.UpsertItemAsync(itemToInsert));
 
             try
             {
