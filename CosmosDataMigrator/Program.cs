@@ -34,8 +34,11 @@ namespace CosmosDataMigrator
                 MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(appSettings.MaxRetryWaitTimeOnRateLimitedRequests)
             };
 
-            using var sourceClient = new CosmosClient(appSettings.SourceConnectionString);
+            using var sourceClient = new CosmosClient(appSettings.SourceConnectionString, cosmosClientOptions);
             var sourceContainer = sourceClient.GetContainer(appSettings.DatabaseName, appSettings.ContainerName);
+
+            using var destinationClient = new CosmosClient(appSettings.DestinationConnectionString, cosmosClientOptions);
+            var destinationContainer = destinationClient.GetContainer(appSettings.DatabaseName, appSettings.ContainerName);
 
             var documentsToMigrate = new List<dynamic>();
 
@@ -70,9 +73,6 @@ namespace CosmosDataMigrator
 
             List<Task> concurrentTasks = new List<Task>();
             
-            using var destinationClient = new CosmosClient(appSettings.DestinationConnectionString);
-            var destinationContainer = destinationClient.GetContainer(appSettings.DatabaseName, appSettings.ContainerName);
-
             foreach (var itemToInsert in documentsToMigrate)
                 concurrentTasks.Add(destinationContainer.UpsertItemAsync(itemToInsert));
 
