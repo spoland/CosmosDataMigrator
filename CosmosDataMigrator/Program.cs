@@ -28,6 +28,12 @@ namespace CosmosDataMigrator
             Console.WriteLine(string.Format($"##### DATA MIGRATION #####\n\n{appSettings}\n\nPress any key to continue..."));
             Console.ReadLine();
 
+            var cosmosClientOptions = new CosmosClientOptions
+            {
+                MaxRetryAttemptsOnRateLimitedRequests = appSettings.MaxRetryAttemptsOnRateLimitedRequests,
+                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(appSettings.MaxRetryWaitTimeOnRateLimitedRequests)
+            };
+
             using var sourceClient = new CosmosClient(appSettings.SourceConnectionString);
             var sourceContainer = sourceClient.GetContainer(appSettings.DatabaseName, appSettings.ContainerName);
 
@@ -39,7 +45,7 @@ namespace CosmosDataMigrator
                     queryDefinition: null,
                     requestOptions: new QueryRequestOptions
                     {
-                        MaxItemCount = appSettings.MaxItemCount
+                        MaxItemCount = appSettings.MaxItemCount                        
                     });
 
                 while (resultSet.HasMoreResults)
