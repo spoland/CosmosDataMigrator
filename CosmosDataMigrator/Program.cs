@@ -17,9 +17,9 @@ namespace CosmosDataMigrator
                 .WriteTo.Async(a => a.File($"log-{DateTime.Now.ToFileTimeUtc()}.txt"))
                 .CreateLogger();
 
-            var config = new ConfigurationBuilder()
-                .AddUserSecrets<Program>()
+            var config = new ConfigurationBuilder()                
                 .AddJsonFile("appsettings.json", false, false)
+                .AddUserSecrets<Program>()
                 .Build();
 
             AppSettings appSettings = new AppSettings();
